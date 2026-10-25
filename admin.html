@@ -1,84 +1,204 @@
-```html
+
 <!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GameZoneX — Administração</title>
 <style>
-body{margin:0;background:#070b14;color:#eef5ff;font:16px system-ui,sans-serif;padding:20px}
-main{max-width:420px;margin:40px auto;background:#101827;padding:24px;border:1px solid #22324b;border-radius:16px}
+*{box-sizing:border-box}
+body{margin:0;padding:18px;background:#070b14;color:#eef5ff;font:16px system-ui,sans-serif}
+main{max-width:900px;margin:auto}
 h1 span{color:#37c5ff}
-input,button{box-sizing:border-box;width:100%;padding:13px;margin:7px 0;border-radius:8px;border:1px solid #34445c}
+.panel{background:#101827;border:1px solid #22324b;border-radius:14px;padding:18px;margin:16px 0}
+input,button{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #34445c;font:inherit}
 input{background:#070b14;color:white}
 button{background:#168bd0;color:white;font-weight:bold;cursor:pointer}
-#status{overflow-wrap:anywhere;color:#a6dfff}
+button.danger{background:#a83245}
+button.secondary{background:#26364d}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.product{background:#0b1220;border:1px solid #283951;border-radius:10px;padding:14px;margin-top:12px}
+.muted{color:#a6b7d0}
+#status{overflow-wrap:anywhere;color:#8ddaff}
+.hidden{display:none!important}
+a{color:#37c5ff}
 </style>
 </head>
 <body>
 <main>
-<h1>GameZone<span>X</span></h1>
-<h2>Login administrativo</h2>
-<p>Entre com sua conta autorizada.</p>
+<h1>GameZone<span>X</span> — Administração</h1>
+<p class="muted">Gerencie jogos, preços, promoções e cupons.</p>
 
-<input id="email" type="email" placeholder="Seu e-mail">
-<input id="senha" type="password" placeholder="Sua senha">
+<section class="panel" id="login">
+<h2>Entrar</h2>
+<input id="email" type="email" placeholder="E-mail autorizado">
+<input id="senha" type="password" placeholder="Senha">
 <button id="entrar">Entrar com e-mail</button>
 <button id="google">Entrar com Google</button>
-<button id="sair" hidden>Sair</button>
-<p id="status">Aguardando login...</p>
-<a href="./">Voltar à loja</a>
+<p id="status">Entre com sua conta administrativa.</p>
+</section>
+
+<section id="dashboard" class="hidden">
+<div class="panel">
+<button id="sair" class="secondary">Sair da conta</button>
+<h2 id="formTitle">Cadastrar jogo</h2>
+<form id="productForm">
+<input id="name" placeholder="Nome do jogo" required>
+<div class="grid">
+<div><label for="price">Preço normal (R$)</label><input id="price" type="number" min="0.01" step="0.01" required></div>
+<div><label for="promoPrice">Preço promocional (R$)</label><input id="promoPrice" type="number" min="0" step="0.01" placeholder="Opcional"></div>
+</div>
+<input id="coupon" placeholder="Nome do cupom (opcional)">
+<label><input id="promoActive" type="checkbox" style="width:auto"> Ativar preço promocional</label>
+<input id="image" type="url" placeholder="Link da capa do jogo (opcional)">
+<button id="save" type="submit">Salvar jogo</button>
+<button id="cancel" type="button" class="secondary hidden">Cancelar edição</button>
+</form>
+<p id="adminStatus"></p>
+</div>
+
+<div class="panel">
+<h2>Jogos cadastrados</h2>
+<div id="products"></div>
+</div>
+</section>
+<p><a href="./">Voltar à loja pública</a></p>
 </main>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
 import {
- getAuth, signInWithEmailAndPassword, signInWithPopup,
- GoogleAuthProvider, onAuthStateChanged, signOut
+ getAuth,signInWithEmailAndPassword,signInWithPopup,
+ GoogleAuthProvider,onAuthStateChanged,signOut
 } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+import {
+ getFirestore,collection,addDoc,updateDoc,deleteDoc,
+ doc,onSnapshot,serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
-const firebaseConfig = {
- apiKey: "AIzaSyAFrWQMTNgF-qDkRDIB_5sfNZVxo0wWpuc",
- authDomain: "gamezonex.firebaseapp.com",
- projectId: "gamezonex",
- storageBucket: "gamezonex.firebasestorage.app",
- messagingSenderId: "1063609787649",
- appId: "1:1063609787649:web:579e1c0506280f3b24a700"
+const firebaseConfig={
+ apiKey:"AIzaSyAFrQMTNgF-fDkRDIB_5sfNZVxo0wWpuc",
+ authDomain:"gamezonex.firebaseapp.com",
+ projectId:"gamezonex",
+ storageBucket:"gamezonex.firebasestorage.app",
+ messagingSenderId:"1063609787649",
+ appId:"1:1063609787649:web:579e1c0506280f3b24a700"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const status = document.getElementById("status");
+// IMPORTANTE: substitua pelo e-mail exato da conta administrativa.
+const ADMIN_EMAIL="SEU-EMAIL-AQUI";
 
-document.getElementById("entrar").onclick = async () => {
- try {
-  await signInWithEmailAndPassword(
-   auth,
-   document.getElementById("email").value.trim(),
-   document.getElementById("senha").value
-  );
- } catch(e) {
-  status.textContent = "Erro no login: " + e.message;
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const status=document.getElementById("status");
+const adminStatus=document.getElementById("adminStatus");
+const login=document.getElementById("login");
+const dashboard=document.getElementById("dashboard");
+const form=document.getElementById("productForm");
+const productsEl=document.getElementById("products");
+let editingId=null;
+let unsubscribe=null;
+let products=[];
+
+const money=n=>Number(n).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const field=id=>document.getElementById(id);
+
+field("entrar").onclick=async()=>{
+ try{
+  await signInWithEmailAndPassword(auth,field("email").value.trim(),field("senha").value);
+ }catch(e){status.textContent="Falha no login: "+e.message;}
+};
+field("google").onclick=async()=>{
+ try{await signInWithPopup(auth,new GoogleAuthProvider());}
+ catch(e){status.textContent="Falha no Google: "+e.message;}
+};
+field("sair").onclick=()=>signOut(auth);
+
+onAuthStateChanged(auth,user=>{
+ if(unsubscribe){unsubscribe();unsubscribe=null;}
+ const allowed=user&&user.email&&user.email.toLowerCase()===ADMIN_EMAIL.toLowerCase()
+   &&ADMIN_EMAIL!=="SEU-EMAIL-AQUI";
+ login.classList.toggle("hidden",!!allowed);
+ dashboard.classList.toggle("hidden",!allowed);
+ if(!user){status.textContent="Entre com sua conta administrativa.";return;}
+ if(!allowed){
+  status.textContent="Conta sem autorização. Confira ADMIN_EMAIL no código.";
+  signOut(auth);
+  return;
  }
-};
-
-document.getElementById("google").onclick = async () => {
- try {
-  await signInWithPopup(auth, new GoogleAuthProvider());
- } catch(e) {
-  status.textContent = "Erro no Google: " + e.message;
- }
-};
-
-document.getElementById("sair").onclick = () => signOut(auth);
-
-onAuthStateChanged(auth, user => {
- document.getElementById("sair").hidden = !user;
- status.textContent = user
-  ? "Login realizado: " + user.email + ". A permissão de administrador ainda precisa ser configurada."
-  : "Entre com sua conta.";
+ status.textContent="Acesso administrativo autorizado.";
+ unsubscribe=onSnapshot(collection(db,"products"),snap=>{
+  products=snap.docs.map(d=>({id:d.id,...d.data()}));
+  render();
+ },e=>adminStatus.textContent="Erro ao carregar produtos: "+e.message);
 });
+
+form.onsubmit=async e=>{
+ e.preventDefault();
+ if(!auth.currentUser||auth.currentUser.email.toLowerCase()!==ADMIN_EMAIL.toLowerCase())return;
+ const price=Number(field("price").value);
+ const promoPrice=Number(field("promoPrice").value)||0;
+ const promoActive=field("promoActive").checked&&promoPrice>0&&promoPrice<price;
+ const data={
+  name:field("name").value.trim(),
+  price,
+  promoPrice,
+  promoActive,
+  coupon:field("coupon").value.trim(),
+  image:field("image").value.trim(),
+  updatedAt:serverTimestamp()
+ };
+ if(!data.name||price<=0){adminStatus.textContent="Informe nome e preço válido.";return;}
+ try{
+  if(editingId)await updateDoc(doc(db,"products",editingId),data);
+  else await addDoc(collection(db,"products"),{...data,createdAt:serverTimestamp(),active:true});
+  resetForm();
+  adminStatus.textContent="Jogo salvo no Firebase.";
+ }catch(err){adminStatus.textContent="Erro ao salvar: "+err.message;}
+};
+
+function resetForm(){
+ editingId=null;form.reset();
+ field("formTitle").textContent="Cadastrar jogo";
+ field("save").textContent="Salvar jogo";
+ field("cancel").classList.add("hidden");
+}
+field("cancel").onclick=resetForm;
+
+function render(){
+ productsEl.innerHTML="";
+ if(!products.length){productsEl.textContent="Nenhum jogo cadastrado ainda.";return;}
+ products.forEach(p=>{
+  const card=document.createElement("article");card.className="product";
+  const title=document.createElement("h3");title.textContent=p.name;
+  const price=document.createElement("p");
+  price.textContent="Preço: "+money(p.price);
+  const promo=document.createElement("p");
+  promo.textContent=p.promoActive?"Promoção: "+money(p.promoPrice)+(p.coupon?" | Cupom: "+p.coupon:""):"Sem promoção ativa";
+  const edit=document.createElement("button");edit.textContent="Editar";
+  edit.onclick=()=>{
+   editingId=p.id;
+   field("name").value=p.name||"";
+   field("price").value=p.price??"";
+   field("promoPrice").value=p.promoPrice||"";
+   field("promoActive").checked=!!p.promoActive;
+   field("coupon").value=p.coupon||"";
+   field("image").value=p.image||"";
+   field("formTitle").textContent="Editar jogo";
+   field("save").textContent="Salvar alterações";
+   field("cancel").classList.remove("hidden");
+   window.scrollTo({top:0,behavior:"smooth"});
+  };
+  const del=document.createElement("button");del.textContent="Excluir";del.className="danger";
+  del.onclick=async()=>{
+   if(!confirm("Excluir "+p.name+"?"))return;
+   try{await deleteDoc(doc(db,"products",p.id));adminStatus.textContent="Jogo excluído.";}
+   catch(e){adminStatus.textContent="Erro ao excluir: "+e.message;}
+  };
+  card.append(title,price,promo,edit,del);productsEl.append(card);
+ });
+}
 </script>
 </body>
 </html>
-```

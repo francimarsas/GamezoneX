@@ -8,157 +8,30 @@
 
 <style>
 *{box-sizing:border-box}
-
-body{
- margin:0;
- background:#070b14;
- color:#eef5ff;
- font:16px system-ui,sans-serif
-}
-
-header{
- padding:22px 16px;
- text-align:center;
- background:#101827;
- border-bottom:1px solid #22324b
-}
-
+body{margin:0;background:#070b14;color:#eef5ff;font:16px system-ui,sans-serif}
+header{padding:22px 16px;text-align:center;background:#101827;border-bottom:1px solid #22324b}
 h1{margin:0;font-size:30px}
 h1 span{color:#37c5ff}
-
 header p{color:#a6b7d0;margin:6px 0 0}
-
 main{max-width:1100px;margin:auto;padding:20px}
-
-input{
- width:100%;
- padding:14px;
- border:1px solid #34445c;
- border-radius:10px;
- background:#101827;
- color:white;
- font-size:16px;
- margin-bottom:20px
-}
-
-.grid{
- display:grid;
- grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
- gap:16px
-}
-
-.card{
- background:#101827;
- border:1px solid #22324b;
- border-radius:14px;
- overflow:hidden;
- transition:transform .2s,border-color .2s
-}
-
-.card:hover{
- transform:translateY(-3px);
- border-color:#37c5ff
-}
-
-.cover{
- height:210px;
- background:#17243a;
- display:flex;
- align-items:center;
- justify-content:center;
- color:#a6b7d0;
- text-align:center;
- position:relative;
- overflow:hidden
-}
-
-.cover img{
- width:100%;
- height:100%;
- object-fit:cover;
- display:block
-}
-
-.available{
- position:absolute;
- top:10px;
- left:10px;
- background:#087f52;
- color:white;
- padding:5px 10px;
- border-radius:6px;
- font-size:12px;
- font-weight:bold;
- letter-spacing:.4px
-}
-
+input{width:100%;padding:14px;border:1px solid #34445c;border-radius:10px;background:#101827;color:white;font-size:16px;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.card{background:#101827;border:1px solid #22324b;border-radius:14px;overflow:hidden;transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-3px);border-color:#37c5ff}
+.cover{height:210px;background:#17243a;display:flex;align-items:center;justify-content:center;color:#a6b7d0;text-align:center;position:relative;overflow:hidden}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.available{position:absolute;top:10px;left:10px;background:#087f52;color:white;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:bold;letter-spacing:.4px}
 .info{padding:15px}
-
-.info h2{
- font-size:18px;
- margin:0 0 10px;
- overflow-wrap:anywhere
-}
-
-.description{
- color:#a6b7d0;
- font-size:13px;
- margin:0 0 12px;
- line-height:1.5
-}
-
-.price{
- font-size:22px;
- font-weight:bold;
- color:#37c5ff
-}
-
-.old{
- color:#9aa8bb;
- text-decoration:line-through;
- font-size:14px;
- margin-bottom:3px
-}
-
-.promo{
- color:#60e6a4;
- font-size:13px;
- margin-top:4px
-}
-
-button{
- width:100%;
- padding:12px;
- border:0;
- border-radius:8px;
- background:#168bd0;
- color:white;
- font-weight:bold;
- font-size:15px;
- cursor:pointer;
- margin-top:12px
-}
-
+.info h2{font-size:18px;margin:0 0 10px;overflow-wrap:anywhere}
+.description{color:#a6b7d0;font-size:13px;margin:0 0 12px;line-height:1.5}
+.price{font-size:22px;font-weight:bold;color:#37c5ff}
+.old{color:#9aa8bb;text-decoration:line-through;font-size:14px;margin-bottom:3px}
+.promo{color:#60e6a4;font-size:13px;margin-top:4px}
+button{width:100%;padding:12px;border:0;border-radius:8px;background:#168bd0;color:white;font-weight:bold;font-size:15px;cursor:pointer;margin-top:12px}
 button:hover{background:#0875b5}
-
-#empty{
- text-align:center;
- color:#a6b7d0;
- padding:30px
-}
-
-#status{
- text-align:center;
- color:#a6b7d0;
- padding:15px
-}
-
-footer{
- text-align:center;
- padding:24px;
- color:#8293ac
-}
-
+#empty{text-align:center;color:#a6b7d0;padding:30px}
+#status{text-align:center;color:#a6b7d0;padding:15px}
+footer{text-align:center;padding:24px;color:#8293ac}
 @media(max-width:500px){
  main{padding:14px}
  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -172,40 +45,24 @@ footer{
 </head>
 
 <body>
-
 <header>
  <h1>GameZone<span>X</span></h1>
  <p>Encontre seu próximo jogo favorito</p>
 </header>
 
 <main>
- <input
-  id="search"
-  type="search"
-  placeholder="🔎 Pesquisar jogo..."
-  aria-label="Pesquisar jogos"
- >
-
+ <input id="search" type="search" placeholder="🔎 Pesquisar jogo..." aria-label="Pesquisar jogos">
  <p id="status">Carregando jogos...</p>
-
  <div class="grid" id="games"></div>
-
  <p id="empty" hidden>Nenhum jogo encontrado.</p>
 </main>
 
 <footer>GameZoneX © Loja de jogos</footer>
 
 <script type="module">
-import { initializeApp }
- from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
-import {
- getFirestore,
- collection,
- onSnapshot
-} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
-
-// Configuração do mesmo Firebase usado pelo painel administrativo
 const firebaseConfig = {
  apiKey: "AIzaSyCqywwnAFR4CokQOU_Bhoe3nZID-12A18s",
  authDomain: "gamezonex.firebaseapp.com",
@@ -216,60 +73,41 @@ const firebaseConfig = {
 };
 
 const WHATSAPP = "5511954242880";
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const productsRef = collection(db, "products");
-
 let products = [];
 
-const money = value =>
- Number(value).toLocaleString("pt-BR", {
-  style: "currency",
-  currency: "BRL"
- });
+const money = value => Number(value || 0).toLocaleString("pt-BR", {
+ style: "currency",
+ currency: "BRL"
+});
 
 function isPromoActive(p) {
  if (p.promoActive !== true) return false;
-
  const promoPrice = Number(p.promoPrice);
-
- if (!Number.isFinite(promoPrice) || promoPrice <= 0) {
-  return false;
- }
-
+ if (!Number.isFinite(promoPrice) || promoPrice <= 0) return false;
  if (promoPrice >= Number(p.price)) return false;
-
  if (p.promoEndsAt) {
   const end = new Date(p.promoEndsAt);
-
-  if (!Number.isNaN(end.getTime()) && Date.now() > end.getTime()) {
-   return false;
-  }
+  if (!Number.isNaN(end.getTime()) && Date.now() > end.getTime()) return false;
  }
-
  return true;
 }
 
 function render() {
- const q = document.getElementById("search").value
-  .trim()
-  .toLowerCase();
-
- const list = products.filter(p =>
-  String(p.name || "").toLowerCase().includes(q)
- );
-
+ const q = document.getElementById("search").value.trim().toLowerCase();
+ const list = products.filter(p => String(p.name || "").toLowerCase().includes(q));
  const games = document.getElementById("games");
  const empty = document.getElementById("empty");
 
  games.replaceChildren();
  empty.hidden = list.length > 0;
 
- if (products.length === 0) {
-  empty.textContent = "Nenhum jogo publicado no momento.";
- } else {
-  empty.textContent = "Nenhum jogo encontrado.";
+ if (list.length === 0) {
+  empty.textContent = products.length === 0
+   ? "Nenhum jogo publicado no momento."
+   : "Nenhum jogo encontrado.";
  }
 
  list.forEach(p => {
@@ -282,14 +120,12 @@ function render() {
   if (p.image && /^https?:\/\//i.test(p.image)) {
    const img = document.createElement("img");
    img.src = p.image;
-   img.alt = "Capa de " + p.name;
+   img.alt = "Capa de " + (p.name || "jogo");
    img.loading = "lazy";
-
    img.onerror = () => {
     img.remove();
-    cover.prepend(document.createTextNode(p.name));
+    cover.prepend(document.createTextNode(p.name || "Capa indisponível"));
    };
-
    cover.appendChild(img);
   } else {
    cover.textContent = p.name || "Jogo";
@@ -305,9 +141,16 @@ function render() {
 
   const title = document.createElement("h2");
   title.textContent = p.name || "Jogo sem nome";
+  info.appendChild(title);
+
+  if (p.description) {
+   const description = document.createElement("p");
+   description.className = "description";
+   description.textContent = p.description;
+   info.appendChild(description);
+  }
 
   const promoActive = isPromoActive(p);
-
   const priceArea = document.createElement("div");
 
   if (promoActive) {
@@ -319,10 +162,7 @@ function render() {
 
   const price = document.createElement("div");
   price.className = "price";
-  price.textContent = money(
-   promoActive ? p.promoPrice : p.price
-  );
-
+  price.textContent = money(promoActive ? p.promoPrice : p.price);
   priceArea.appendChild(price);
 
   if (promoActive) {
@@ -332,23 +172,12 @@ function render() {
    priceArea.appendChild(promo);
   }
 
-  info.append(title);
-
-  if (p.description) {
-   const description = document.createElement("p");
-   description.className = "description";
-   description.textContent = p.description;
-   info.appendChild(description);
-  }
-
   info.appendChild(priceArea);
 
   const buy = document.createElement("button");
   buy.textContent = "Comprar pelo WhatsApp";
-
   buy.onclick = () => {
    const finalPrice = promoActive ? p.promoPrice : p.price;
-
    const msg =
     `Olá! Quero comprar o jogo ${p.name} na GameZoneX.\n` +
     `Valor anunciado: ${money(finalPrice)}.\n` +
@@ -368,29 +197,28 @@ function render() {
 
 document.getElementById("search").addEventListener("input", render);
 
-// Recebe atualizações do Firebase automaticamente
+// Lê os jogos do Firebase e atualiza a loja automaticamente.
 onSnapshot(
  productsRef,
  snapshot => {
   products = snapshot.docs
    .map(d => ({ id: d.id, ...d.data() }))
-   .filter(p => p.active !== false)
-   .filter(p => p.active === true);
+   // Mostra jogos publicados e registros antigos sem o campo active.
+   // Jogos marcados explicitamente como ocultos continuam escondidos.
+   .filter(p => p.active !== false);
 
   document.getElementById("status").hidden = true;
   render();
  },
  error => {
   console.error("Erro ao carregar jogos:", error);
-
-  document.getElementById("status").hidden = false;
-  document.getElementById("status").textContent =
-   "Não foi possível carregar os jogos. Verifique a conexão com o Firebase.";
-
+  const status = document.getElementById("status");
+  status.hidden = false;
+  status.textContent =
+   "Não foi possível carregar os jogos. Verifique as regras de leitura do Firebase.";
   document.getElementById("empty").hidden = true;
  }
 );
 </script>
-
 </body>
 </html>

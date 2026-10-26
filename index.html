@@ -5,108 +5,392 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GameZoneX — Loja de Jogos</title>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#070b14;color:#eef5ff;font:16px system-ui,sans-serif}
-header{padding:22px 16px;text-align:center;background:#101827;border-bottom:1px solid #22324b}
+
+body{
+ margin:0;
+ background:#070b14;
+ color:#eef5ff;
+ font:16px system-ui,sans-serif
+}
+
+header{
+ padding:22px 16px;
+ text-align:center;
+ background:#101827;
+ border-bottom:1px solid #22324b
+}
+
 h1{margin:0;font-size:30px}
 h1 span{color:#37c5ff}
+
 header p{color:#a6b7d0;margin:6px 0 0}
-main{max-width:1000px;margin:auto;padding:20px}
-input{width:100%;padding:14px;border:1px solid #34445c;border-radius:10px;background:#101827;color:white;font-size:16px;margin-bottom:20px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
-.card{background:#101827;border:1px solid #22324b;border-radius:14px;overflow:hidden}
-.cover{height:180px;background:#17243a;display:flex;align-items:center;justify-content:center;color:#a6b7d0;text-align:center;padding:12px}
-.cover img{width:100%;height:100%;object-fit:cover}
+
+main{max-width:1100px;margin:auto;padding:20px}
+
+input{
+ width:100%;
+ padding:14px;
+ border:1px solid #34445c;
+ border-radius:10px;
+ background:#101827;
+ color:white;
+ font-size:16px;
+ margin-bottom:20px
+}
+
+.grid{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+ gap:16px
+}
+
+.card{
+ background:#101827;
+ border:1px solid #22324b;
+ border-radius:14px;
+ overflow:hidden;
+ transition:transform .2s,border-color .2s
+}
+
+.card:hover{
+ transform:translateY(-3px);
+ border-color:#37c5ff
+}
+
+.cover{
+ height:210px;
+ background:#17243a;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ color:#a6b7d0;
+ text-align:center;
+ position:relative;
+ overflow:hidden
+}
+
+.cover img{
+ width:100%;
+ height:100%;
+ object-fit:cover;
+ display:block
+}
+
+.available{
+ position:absolute;
+ top:10px;
+ left:10px;
+ background:#087f52;
+ color:white;
+ padding:5px 10px;
+ border-radius:6px;
+ font-size:12px;
+ font-weight:bold;
+ letter-spacing:.4px
+}
+
 .info{padding:15px}
-.info h2{font-size:18px;margin:0 0 12px}
-.price{font-size:22px;font-weight:bold;color:#37c5ff}
-.old{color:#9aa8bb;text-decoration:line-through;font-size:14px}
-.promo{color:#60e6a4;font-size:13px}
-button{width:100%;padding:12px;border:0;border-radius:8px;background:#168bd0;color:white;font-weight:bold;font-size:16px;cursor:pointer;margin-top:12px}
+
+.info h2{
+ font-size:18px;
+ margin:0 0 10px;
+ overflow-wrap:anywhere
+}
+
+.description{
+ color:#a6b7d0;
+ font-size:13px;
+ margin:0 0 12px;
+ line-height:1.5
+}
+
+.price{
+ font-size:22px;
+ font-weight:bold;
+ color:#37c5ff
+}
+
+.old{
+ color:#9aa8bb;
+ text-decoration:line-through;
+ font-size:14px;
+ margin-bottom:3px
+}
+
+.promo{
+ color:#60e6a4;
+ font-size:13px;
+ margin-top:4px
+}
+
+button{
+ width:100%;
+ padding:12px;
+ border:0;
+ border-radius:8px;
+ background:#168bd0;
+ color:white;
+ font-weight:bold;
+ font-size:15px;
+ cursor:pointer;
+ margin-top:12px
+}
+
 button:hover{background:#0875b5}
-#empty{text-align:center;color:#a6b7d0;padding:30px}
-footer{text-align:center;padding:24px;color:#8293ac}
+
+#empty{
+ text-align:center;
+ color:#a6b7d0;
+ padding:30px
+}
+
+#status{
+ text-align:center;
+ color:#a6b7d0;
+ padding:15px
+}
+
+footer{
+ text-align:center;
+ padding:24px;
+ color:#8293ac
+}
+
+@media(max-width:500px){
+ main{padding:14px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .cover{height:155px}
+ .info{padding:11px}
+ .info h2{font-size:15px}
+ .price{font-size:19px}
+ button{font-size:13px;padding:10px}
+}
 </style>
 </head>
+
 <body>
+
 <header>
-<h1>GameZone<span>X</span></h1>
-<p>Encontre seu próximo jogo favorito</p>
+ <h1>GameZone<span>X</span></h1>
+ <p>Encontre seu próximo jogo favorito</p>
 </header>
+
 <main>
-<input id="search" type="search" placeholder="🔎 Pesquisar jogo..." aria-label="Pesquisar jogos">
-<div class="grid" id="games"></div>
-<p id="empty" hidden>Nenhum jogo encontrado.</p>
+ <input
+  id="search"
+  type="search"
+  placeholder="🔎 Pesquisar jogo..."
+  aria-label="Pesquisar jogos"
+ >
+
+ <p id="status">Carregando jogos...</p>
+
+ <div class="grid" id="games"></div>
+
+ <p id="empty" hidden>Nenhum jogo encontrado.</p>
 </main>
+
 <footer>GameZoneX © Loja de jogos</footer>
-<script>
-const WHATSAPP="5511954242880";
 
-const products=[
- {name:"Forza Horizon 6",price:9.90},
- {name:"Mortal Shell",price:4.90},
- {name:"Marvel's Spider-Man Remastered",price:9.90},
- {name:"Spider-Man 2",price:9.90},
- {name:"Miles Morales",price:7.90},
- {name:"LEGO Marvel Super Heroes 2",price:9.90},
- {name:"Ghostwire: Tokyo",price:4.90},
- {name:"Forza Horizon 4",price:4.90},
- {name:"Devil May Cry 5",price:12.90},
- {name:"Resident Evil Requiem",price:16.90},
- {name:"Pacote FPS AAA",price:14.90}
-];
+<script type="module">
+import { initializeApp }
+ from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
 
-const money=n=>Number(n).toLocaleString("pt-BR",{
- style:"currency",currency:"BRL"
-});
+import {
+ getFirestore,
+ collection,
+ onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
-function render(){
- const q=document.getElementById("search").value
-  .trim().toLowerCase();
- const list=products.filter(p=>p.name.toLowerCase().includes(q));
- const games=document.getElementById("games");
- games.innerHTML="";
- document.getElementById("empty").hidden=list.length>0;
+// Configuração do mesmo Firebase usado pelo painel administrativo
+const firebaseConfig = {
+ apiKey: "AIzaSyCqywwnAFR4CokQOU_Bhoe3nZID-12A18s",
+ authDomain: "gamezonex.firebaseapp.com",
+ projectId: "gamezonex",
+ storageBucket: "gamezonex.firebasestorage.app",
+ messagingSenderId: "1063609787649",
+ appId: "1:1063609787649:web:579e1c0506280f3b24a700"
+};
 
- list.forEach(p=>{
-  const card=document.createElement("article");
-  card.className="card";
+const WHATSAPP = "5511954242880";
 
-  const cover=document.createElement("div");
-  cover.className="cover";
-  cover.textContent=p.name;
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const productsRef = collection(db, "products");
 
-  const info=document.createElement("div");
-  info.className="info";
+let products = [];
 
-  const title=document.createElement("h2");
-  title.textContent=p.name;
+const money = value =>
+ Number(value).toLocaleString("pt-BR", {
+  style: "currency",
+  currency: "BRL"
+ });
 
-  const price=document.createElement("div");
-  price.className="price";
-  price.textContent=money(p.price);
+function isPromoActive(p) {
+ if (p.promoActive !== true) return false;
 
-  const buy=document.createElement("button");
-  buy.textContent="Comprar pelo WhatsApp";
-  buy.onclick=()=>{
-   const msg=
-    `Olá! Quero comprar o jogo ${p.name} na GameZoneX.\n`+
-    `Valor anunciado: ${money(p.price)}.\n`+
+ const promoPrice = Number(p.promoPrice);
+
+ if (!Number.isFinite(promoPrice) || promoPrice <= 0) {
+  return false;
+ }
+
+ if (promoPrice >= Number(p.price)) return false;
+
+ if (p.promoEndsAt) {
+  const end = new Date(p.promoEndsAt);
+
+  if (!Number.isNaN(end.getTime()) && Date.now() > end.getTime()) {
+   return false;
+  }
+ }
+
+ return true;
+}
+
+function render() {
+ const q = document.getElementById("search").value
+  .trim()
+  .toLowerCase();
+
+ const list = products.filter(p =>
+  String(p.name || "").toLowerCase().includes(q)
+ );
+
+ const games = document.getElementById("games");
+ const empty = document.getElementById("empty");
+
+ games.replaceChildren();
+ empty.hidden = list.length > 0;
+
+ if (products.length === 0) {
+  empty.textContent = "Nenhum jogo publicado no momento.";
+ } else {
+  empty.textContent = "Nenhum jogo encontrado.";
+ }
+
+ list.forEach(p => {
+  const card = document.createElement("article");
+  card.className = "card";
+
+  const cover = document.createElement("div");
+  cover.className = "cover";
+
+  if (p.image && /^https?:\/\//i.test(p.image)) {
+   const img = document.createElement("img");
+   img.src = p.image;
+   img.alt = "Capa de " + p.name;
+   img.loading = "lazy";
+
+   img.onerror = () => {
+    img.remove();
+    cover.prepend(document.createTextNode(p.name));
+   };
+
+   cover.appendChild(img);
+  } else {
+   cover.textContent = p.name || "Jogo";
+  }
+
+  const available = document.createElement("span");
+  available.className = "available";
+  available.textContent = "DISPONÍVEL";
+  cover.appendChild(available);
+
+  const info = document.createElement("div");
+  info.className = "info";
+
+  const title = document.createElement("h2");
+  title.textContent = p.name || "Jogo sem nome";
+
+  const promoActive = isPromoActive(p);
+
+  const priceArea = document.createElement("div");
+
+  if (promoActive) {
+   const oldPrice = document.createElement("div");
+   oldPrice.className = "old";
+   oldPrice.textContent = money(p.price);
+   priceArea.appendChild(oldPrice);
+  }
+
+  const price = document.createElement("div");
+  price.className = "price";
+  price.textContent = money(
+   promoActive ? p.promoPrice : p.price
+  );
+
+  priceArea.appendChild(price);
+
+  if (promoActive) {
+   const promo = document.createElement("div");
+   promo.className = "promo";
+   promo.textContent = "🔥 Oferta promocional";
+   priceArea.appendChild(promo);
+  }
+
+  info.append(title);
+
+  if (p.description) {
+   const description = document.createElement("p");
+   description.className = "description";
+   description.textContent = p.description;
+   info.appendChild(description);
+  }
+
+  info.appendChild(priceArea);
+
+  const buy = document.createElement("button");
+  buy.textContent = "Comprar pelo WhatsApp";
+
+  buy.onclick = () => {
+   const finalPrice = promoActive ? p.promoPrice : p.price;
+
+   const msg =
+    `Olá! Quero comprar o jogo ${p.name} na GameZoneX.\n` +
+    `Valor anunciado: ${money(finalPrice)}.\n` +
     `Pode confirmar a disponibilidade e o pagamento?`;
+
    window.open(
     `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`,
     "_blank"
    );
   };
 
-  info.append(title,price,buy);
-  card.append(cover,info);
-  games.append(card);
+  info.appendChild(buy);
+  card.append(cover, info);
+  games.appendChild(card);
  });
 }
-document.getElementById("search").addEventListener("input",render);
-render();
+
+document.getElementById("search").addEventListener("input", render);
+
+// Recebe atualizações do Firebase automaticamente
+onSnapshot(
+ productsRef,
+ snapshot => {
+  products = snapshot.docs
+   .map(d => ({ id: d.id, ...d.data() }))
+   .filter(p => p.active !== false)
+   .filter(p => p.active === true);
+
+  document.getElementById("status").hidden = true;
+  render();
+ },
+ error => {
+  console.error("Erro ao carregar jogos:", error);
+
+  document.getElementById("status").hidden = false;
+  document.getElementById("status").textContent =
+   "Não foi possível carregar os jogos. Verifique a conexão com o Firebase.";
+
+  document.getElementById("empty").hidden = true;
+ }
+);
 </script>
+
 </body>
 </html>

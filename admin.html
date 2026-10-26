@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -13,18 +14,21 @@ h1{font-size:27px}h2{font-size:20px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:17px;margin:16px 0}
 label{display:block;font-size:13px;color:#c9d9ef;margin:12px 0 6px}
 input,textarea,select{width:100%;padding:12px;border:1px solid #354963;border-radius:8px;background:#070d18;color:white;font:inherit}
+input[type=checkbox]{width:auto}
 textarea{min-height:85px;resize:vertical}
 button{border:0;border-radius:8px;padding:12px 15px;background:var(--blue);color:white;font-weight:bold;cursor:pointer;margin:8px 5px 0 0}
 button.secondary{background:#293950}button.danger{background:#b83245}
+button:disabled{opacity:.6;cursor:wait}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}
 .full{grid-column:1/-1}
 .muted{color:var(--muted);font-size:13px;line-height:1.5}
-.status{padding:10px 0;overflow-wrap:anywhere;color:#9dd3ff}
+.status{padding:10px 0;overflow-wrap:anywhere;color:#9dd3ff;white-space:pre-wrap}
 .item{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .item img{width:100px;aspect-ratio:460/215;object-fit:cover;border-radius:7px}
 .item .info{flex:1;min-width:0;overflow-wrap:anywhere}
 .item button{margin-top:5px}
 #app[hidden],#login[hidden]{display:none}
+#errorPanel{display:none;background:#391923;border:1px solid #b83245;border-radius:10px;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:600px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.item{flex-wrap:wrap}.item img{width:85px}}
 </style>
 </head>
@@ -32,6 +36,7 @@ button.secondary{background:#293950}button.danger{background:#b83245}
 <main>
 <h1>GameZone<span style="color:#168cff">X</span> — Painel administrativo</h1>
 <p class="muted">Cadastre e gerencie os jogos da loja.</p>
+<div id="errorPanel" role="alert"></div>
 
 <section id="login" class="panel">
 <h2>Entrar no painel</h2>
@@ -51,103 +56,45 @@ button.secondary{background:#293950}button.danger{background:#b83245}
 <button id="logout" class="secondary">Sair</button>
 <div id="status" class="status" role="status"></div>
 </div>
-
 <form id="productForm" class="panel">
 <h2 id="formTitle">Adicionar jogo</h2>
 <p class="muted">Busque jogos na Steam e confira os dados antes de publicar.</p>
-
 <div class="grid">
 <div class="full">
 <label for="name">Nome do jogo *</label>
 <input id="name" required placeholder="Ex.: Mortal Shell">
 <button type="button" id="steamSearch">Buscar na Steam</button>
 </div>
-<div>
-<label for="price">Preço normal (R$) *</label>
-<input id="price" type="number" min="0" max="17" step="0.01" required placeholder="9.90">
+<div><label for="price">Preço normal (R$) *</label><input id="price" type="number" min="0" max="17" step="0.01" required placeholder="9.90"></div>
+<div><label for="platform">Plataforma</label><select id="platform"><option>PC · Steam</option><option>PC</option><option>Outra</option></select></div>
+<div class="full"><label for="image">URL da capa</label><input id="image" type="url" placeholder="https://..."></div>
+<div class="full"><label for="description">Descrição do jogo</label><textarea id="description" placeholder="Descrição do jogo"></textarea></div>
+<div><label for="promoPrice">Preço promocional (R$)</label><input id="promoPrice" type="number" min="0" max="17" step="0.01" placeholder="Opcional"></div>
+<div><label for="promoEndsAt">Fim da promoção</label><input id="promoEndsAt" type="datetime-local"></div>
+<div class="full"><label><input id="promoActive" type="checkbox"> Ativar promoção</label></div>
+<div><label for="coupon">Código do cupom</label><input id="coupon" placeholder="Ex.: GAME10"></div>
+<div><label for="couponType">Tipo de desconto do cupom</label><select id="couponType"><option value="percent">Porcentagem (%)</option><option value="fixed">Valor fixo (R$)</option></select></div>
+<div><label for="couponValue">Valor do desconto</label><input id="couponValue" type="number" min="0" step="0.01" placeholder="Ex.: 10"></div>
+<div><label for="couponEndsAt">Validade do cupom</label><input id="couponEndsAt" type="datetime-local"></div>
+<div class="full"><label for="minimumSpecs">Requisitos mínimos do PC</label><textarea id="minimumSpecs" placeholder="Processador, memória RAM, placa de vídeo e armazenamento"></textarea></div>
+<div class="full"><label for="recommendedSpecs">Requisitos recomendados do PC</label><textarea id="recommendedSpecs" placeholder="Processador, memória RAM, placa de vídeo e armazenamento"></textarea></div>
+<div><label for="mode">Modo de jogo</label><select id="mode"><option value="offline">Offline</option><option value="online">Online</option><option value="both">Offline e online</option><option value="unknown">Não confirmado</option></select></div>
+<div><label for="boosteroid">Compatibilidade com Boosteroid</label><select id="boosteroid"><option value="unknown">Não confirmada</option><option value="yes">Compatível</option><option value="no">Não compatível</option></select></div>
+<div><label for="geforceNow">Compatibilidade com GeForce NOW</label><select id="geforceNow"><option value="unknown">Não confirmada</option><option value="yes">Compatível</option><option value="no">Não compatível</option></select></div>
+<div><label for="active">Visibilidade na loja</label><select id="active"><option value="true">Publicado</option><option value="false">Oculto</option></select></div>
 </div>
-<div>
-<label for="platform">Plataforma</label>
-<select id="platform"><option>PC · Steam</option><option>PC</option><option>Outra</option></select>
-</div>
-<div class="full">
-<label for="image">URL da capa</label>
-<input id="image" type="url" placeholder="https://...">
-</div>
-<div class="full">
-<label for="description">Descrição do jogo</label>
-<textarea id="description" placeholder="Descrição do jogo"></textarea>
-</div>
-<div>
-<label for="promoPrice">Preço promocional (R$)</label>
-<input id="promoPrice" type="number" min="0" max="17" step="0.01" placeholder="Opcional">
-</div>
-<div>
-<label for="promoEndsAt">Fim da promoção</label>
-<input id="promoEndsAt" type="datetime-local">
-</div>
-<div class="full">
-<label><input id="promoActive" type="checkbox" style="width:auto"> Ativar promoção</label>
-</div>
-<div>
-<label for="coupon">Código do cupom</label>
-<input id="coupon" placeholder="Ex.: GAME10">
-</div>
-<div>
-<label for="couponType">Tipo de desconto do cupom</label>
-<select id="couponType"><option value="percent">Porcentagem (%)</option><option value="fixed">Valor fixo (R$)</option></select>
-</div>
-<div>
-<label for="couponValue">Valor do desconto</label>
-<input id="couponValue" type="number" min="0" step="0.01" placeholder="Ex.: 10">
-</div>
-<div>
-<label for="couponEndsAt">Validade do cupom</label>
-<input id="couponEndsAt" type="datetime-local">
-</div>
-<div class="full">
-<label for="minimumSpecs">Requisitos mínimos do PC</label>
-<textarea id="minimumSpecs" placeholder="Processador, memória RAM, placa de vídeo e armazenamento"></textarea>
-</div>
-<div class="full">
-<label for="recommendedSpecs">Requisitos recomendados do PC</label>
-<textarea id="recommendedSpecs" placeholder="Processador, memória RAM, placa de vídeo e armazenamento"></textarea>
-</div>
-<div>
-<label for="mode">Modo de jogo</label>
-<select id="mode"><option value="offline">Offline</option><option value="online">Online</option><option value="both">Offline e online</option><option value="unknown">Não confirmado</option></select>
-</div>
-<div>
-<label for="boosteroid">Compatibilidade com Boosteroid</label>
-<select id="boosteroid"><option value="unknown">Não confirmada</option><option value="yes">Compatível</option><option value="no">Não compatível</option></select>
-</div>
-<div>
-<label for="geforceNow">Compatibilidade com GeForce NOW</label>
-<select id="geforceNow"><option value="unknown">Não confirmada</option><option value="yes">Compatível</option><option value="no">Não compatível</option></select>
-</div>
-<div>
-<label for="active">Visibilidade na loja</label>
-<select id="active"><option value="true">Publicado</option><option value="false">Oculto</option></select>
-</div>
-</div>
-<div>
-<button type="submit" id="save">Adicionar jogo</button>
-<button type="button" id="clear" class="secondary">Limpar formulário</button>
-<button type="button" id="cancelEdit" class="secondary" hidden>Cancelar edição</button>
-</div>
+<div><button type="submit" id="save">Adicionar jogo</button><button type="button" id="clear" class="secondary">Limpar formulário</button><button type="button" id="cancelEdit" class="secondary" hidden>Cancelar edição</button></div>
 </form>
-
-<div class="panel">
-<h2>Jogos cadastrados</h2>
-<p class="muted">Os jogos são carregados do Firestore.</p>
-<div id="productsList"></div>
-</div>
+<div class="panel"><h2>Jogos cadastrados</h2><p class="muted">Os jogos são carregados do Firestore.</p><div id="productsList"></div></div>
 </section>
 </main>
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,signOut} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+import {
+  getAuth,onAuthStateChanged,signInWithEmailAndPassword,
+  signInWithRedirect,getRedirectResult,GoogleAuthProvider,signOut
+} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 import {getFirestore,collection,addDoc,updateDoc,deleteDoc,doc,onSnapshot,serverTimestamp} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
 const firebaseConfig={
@@ -158,79 +105,66 @@ const firebaseConfig={
  messagingSenderId:"1063609787649",
  appId:"1:1063609787649:web:579e1c0506280f3b24a700"
 };
-
 const ADMIN_EMAIL="heilongh902@gmail.com";
-const firebaseApp=initializeApp(firebaseConfig);
-const auth=getAuth(firebaseApp);
-const db=getFirestore(firebaseApp);
-const provider=new GoogleAuthProvider();
 const $=id=>document.getElementById(id);
-const productsRef=collection(db,"products");
-let products=[],editingId=null,unsubscribeProducts=null;
 
+function showFatal(message){
+ const panel=$("errorPanel");
+ if(panel){panel.style.display="block";panel.textContent=message}
+}
+window.addEventListener("error",e=>showFatal("Erro na página: "+(e.message||"erro desconhecido")));
+window.addEventListener("unhandledrejection",e=>showFatal("Erro inesperado: "+(e.reason?.message||String(e.reason))));
+
+let firebaseApp,auth,db,provider,productsRef;
+try{
+ firebaseApp=initializeApp(firebaseConfig);
+ auth=getAuth(firebaseApp);
+ db=getFirestore(firebaseApp);
+ provider=new GoogleAuthProvider();
+ provider.setCustomParameters({prompt:"select_account"});
+ productsRef=collection(db,"products");
+}catch(e){
+ showFatal("Falha ao iniciar o Firebase: "+(e.code||"")+" "+e.message);
+ throw e;
+}
+
+let products=[],editingId=null,unsubscribeProducts=null;
 function status(message){$("status").textContent=message}
 function loginStatus(message){$("loginStatus").textContent=message}
 function escapeHTML(value=""){return String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function money(value){return Number(value||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
-function dateValue(id){const v=$(id).value;return v?new Date(v).toISOString():""}
+function dateValue(id){const v=$(id).value;if(!v)return "";const d=new Date(v);return Number.isNaN(d.getTime())?"":d.toISOString()}
 function setDateInput(id,value){if(!value){$(id).value="";return}const d=new Date(value);if(!Number.isNaN(d.getTime())){const local=new Date(d.getTime()-d.getTimezoneOffset()*60000);$(id).value=local.toISOString().slice(0,16)}else $(id).value=""}
 function placeholder(name="GameZoneX"){return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="460" height="215"><rect width="100%" height="100%" fill="#111c2d"/><text x="50%" y="50%" fill="#9dd3ff" font-family="Arial" font-size="22" text-anchor="middle" dominant-baseline="middle">${escapeHTML(name.slice(0,25))}</text></svg>`)}
 
 function startProducts(){
  if(unsubscribeProducts)unsubscribeProducts();
  unsubscribeProducts=onSnapshot(productsRef,snapshot=>{
-  products=snapshot.docs.map(d=>({id:d.id,...d.data()}));
-  renderProducts();
- },error=>status("Erro ao carregar jogos: "+error.message));
+  products=snapshot.docs.map(d=>({id:d.id,...d.data()}));renderProducts();
+ },error=>status("Erro ao carregar jogos: "+error.code+" — "+error.message));
 }
-function stopProducts(){
- if(unsubscribeProducts)unsubscribeProducts();
- unsubscribeProducts=null;products=[];$("productsList").innerHTML="";
-}
+function stopProducts(){if(unsubscribeProducts)unsubscribeProducts();unsubscribeProducts=null;products=[];$("productsList").innerHTML=""}
 function renderProducts(){
  const list=$("productsList");
  if(!products.length){list.innerHTML='<p class="muted">Nenhum jogo cadastrado.</p>';return}
- list.innerHTML=products.map(p=>`<div class="item"><img src="${escapeHTML(p.image||placeholder(p.name))}" alt=""><div class="info"><strong>${escapeHTML(p.name||"Sem nome")}</strong><br>${money(p.price)}${p.promoActive&&p.promoPrice!=null?" · Promoção: "+money(p.promoPrice):""}<br><small>${p.active===false?"Oculto":"Publicado"}</small></div><div><button type="button" data-edit="${p.id}">Editar</button><button type="button" class="danger" data-delete="${p.id}">Excluir</button></div></div>`).join("");
+ list.innerHTML=products.map(p=>`<div class="item"><img src="${escapeHTML(p.image||placeholder(p.name))}" alt=""><div class="info"><strong>${escapeHTML(p.name||"Sem nome")}</strong><br>${money(p.price)}${p.promoActive&&p.promoPrice!=null?" · Promoção: "+money(p.promoPrice):""}<br><small>${p.active===false?"Oculto":"Publicado"}</small></div><div><button type="button" data-edit="${escapeHTML(p.id)}">Editar</button><button type="button" class="danger" data-delete="${escapeHTML(p.id)}">Excluir</button></div></div>`).join("");
  list.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editProduct(b.dataset.edit)));
  list.querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",()=>deleteProduct(b.dataset.delete)));
 }
 function formData(){
  const promoText=$("promoPrice").value.trim(),couponValueText=$("couponValue").value.trim();
- return {
-  name:$("name").value.trim(),price:Number($("price").value),
-  platform:$("platform").value,image:$("image").value.trim(),
-  description:$("description").value.trim(),
-  promoPrice:promoText===""?null:Number(promoText),promoActive:$("promoActive").checked,
-  promoEndsAt:dateValue("promoEndsAt"),coupon:$("coupon").value.trim().toUpperCase(),
-  couponType:$("couponType").value,couponValue:couponValueText===""?0:Number(couponValueText),
-  couponEndsAt:dateValue("couponEndsAt"),minimumSpecs:$("minimumSpecs").value.trim(),
-  recommendedSpecs:$("recommendedSpecs").value.trim(),mode:$("mode").value,
-  boosteroid:$("boosteroid").value,geforceNow:$("geforceNow").value,
-  active:$("active").value==="true",updatedAt:serverTimestamp()
- };
+ return {name:$("name").value.trim(),price:Number($("price").value),platform:$("platform").value,image:$("image").value.trim(),description:$("description").value.trim(),promoPrice:promoText===""?null:Number(promoText),promoActive:$("promoActive").checked,promoEndsAt:dateValue("promoEndsAt"),coupon:$("coupon").value.trim().toUpperCase(),couponType:$("couponType").value,couponValue:couponValueText===""?0:Number(couponValueText),couponEndsAt:dateValue("couponEndsAt"),minimumSpecs:$("minimumSpecs").value.trim(),recommendedSpecs:$("recommendedSpecs").value.trim(),mode:$("mode").value,boosteroid:$("boosteroid").value,geforceNow:$("geforceNow").value,active:$("active").value==="true",updatedAt:serverTimestamp()}
 }
-function clearForm(){
- $("productForm").reset();editingId=null;$("formTitle").textContent="Adicionar jogo";
- $("save").textContent="Adicionar jogo";$("cancelEdit").hidden=true;status("");
-}
+function clearForm(){$("productForm").reset();editingId=null;$("formTitle").textContent="Adicionar jogo";$("save").textContent="Adicionar jogo";$("cancelEdit").hidden=true;status("")}
 function editProduct(id){
  const p=products.find(x=>x.id===id);if(!p)return;editingId=id;
- $("name").value=p.name||"";$("price").value=p.price??"";
- $("platform").value=p.platform||"PC · Steam";$("image").value=p.image||"";
- $("description").value=p.description||"";$("promoPrice").value=p.promoPrice??"";
- $("promoActive").checked=!!p.promoActive;setDateInput("promoEndsAt",p.promoEndsAt);
- $("coupon").value=p.coupon||"";$("couponType").value=p.couponType||"percent";
- $("couponValue").value=p.couponValue??"";setDateInput("couponEndsAt",p.couponEndsAt);
- $("minimumSpecs").value=p.minimumSpecs||"";$("recommendedSpecs").value=p.recommendedSpecs||"";
- $("mode").value=p.mode||"unknown";$("boosteroid").value=p.boosteroid||"unknown";
- $("geforceNow").value=p.geforceNow||"unknown";$("active").value=p.active===false?"false":"true";
- $("formTitle").textContent="Editar jogo";$("save").textContent="Salvar alterações";
- $("cancelEdit").hidden=false;$("productForm").scrollIntoView({behavior:"smooth"});
+ $("name").value=p.name||"";$("price").value=p.price??"";$("platform").value=p.platform||"PC · Steam";$("image").value=p.image||"";$("description").value=p.description||"";$("promoPrice").value=p.promoPrice??"";$("promoActive").checked=!!p.promoActive;setDateInput("promoEndsAt",p.promoEndsAt);$("coupon").value=p.coupon||"";$("couponType").value=p.couponType||"percent";$("couponValue").value=p.couponValue??"";setDateInput("couponEndsAt",p.couponEndsAt);$("minimumSpecs").value=p.minimumSpecs||"";$("recommendedSpecs").value=p.recommendedSpecs||"";$("mode").value=p.mode||"unknown";$("boosteroid").value=p.boosteroid||"unknown";$("geforceNow").value=p.geforceNow||"unknown";$("active").value=p.active===false?"false":"true";
+ $("formTitle").textContent="Editar jogo";$("save").textContent="Salvar alterações";$("cancelEdit").hidden=false;$("productForm").scrollIntoView({behavior:"smooth"});
 }
 async function deleteProduct(id){
  const p=products.find(x=>x.id===id);if(!p||!confirm("Excluir "+p.name+" do catálogo?"))return;
  try{await deleteDoc(doc(db,"products",id));status("Jogo excluído.")}
- catch(e){status("Não foi possível excluir: "+e.message)}
+ catch(e){status("Não foi possível excluir: "+e.code+" — "+e.message)}
 }
 $("productForm").addEventListener("submit",async e=>{
  e.preventDefault();const data=formData();
@@ -241,34 +175,45 @@ $("productForm").addEventListener("submit",async e=>{
  if(data.promoActive&&data.promoPrice===null){status("Informe o preço promocional antes de ativar a promoção.");return}
  if(data.promoPrice!==null&&data.promoPrice>data.price){status("O preço promocional não deve ser maior que o preço normal.");return}
  if(data.couponType==="percent"&&data.couponValue>100){status("O desconto percentual não pode ultrapassar 100%.");return}
- try{
-  $("save").disabled=true;status("Salvando no Firestore...");
+ try{$("save").disabled=true;status("Salvando no Firestore...");
   if(editingId){await updateDoc(doc(db,"products",editingId),data);status("Jogo atualizado com sucesso.")}
   else{await addDoc(productsRef,{...data,createdAt:serverTimestamp()});status("Jogo adicionado com sucesso.")}
   clearForm();
- }catch(e){status("Erro ao salvar: "+e.message+". Confira as regras do Firestore.")}
+ }catch(e){status("Erro ao salvar: "+e.code+" — "+e.message+". Confira as regras do Firestore.")}
  finally{$("save").disabled=false}
 });
 $("clear").addEventListener("click",clearForm);
 $("cancelEdit").addEventListener("click",clearForm);
+
 $("loginEmail").addEventListener("click",async()=>{
  try{loginStatus("Entrando...");await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value)}
- catch(e){loginStatus("Falha no login: "+e.message)}
+ catch(e){loginStatus("Falha no login: "+e.code+" — "+e.message)}
 });
 $("loginGoogle").addEventListener("click",async()=>{
- try{loginStatus("Abrindo login do Google...");await signInWithPopup(auth,provider)}
- catch(e){loginStatus("Falha no Google: "+e.message)}
-});
-$("logout").addEventListener("click",()=>signOut(auth));
-onAuthStateChanged(auth,user=>{
- if(user&&user.email?.toLowerCase()===ADMIN_EMAIL.toLowerCase()){
-  $("login").hidden=true;$("app").hidden=false;$("signedEmail").textContent="Conectado: "+user.email;
-  loginStatus("");startProducts();
- }else{
-  stopProducts();$("app").hidden=true;$("login").hidden=false;
-  if(user){signOut(auth);loginStatus("Esta conta não está autorizada para administrar a loja.")}
+ try{
+  loginStatus("Indo para o Google para escolher a conta...");
+  $("loginGoogle").disabled=true;
+  await signInWithRedirect(auth,provider);
+ }catch(e){
+  $("loginGoogle").disabled=false;
+  loginStatus("Falha no Google: "+e.code+" — "+e.message);
  }
 });
+$("logout").addEventListener("click",async()=>{try{await signOut(auth)}catch(e){status("Erro ao sair: "+e.message)}});
+
+getRedirectResult(auth).then(result=>{
+ if(result?.user)loginStatus("Login recebido. Verificando autorização...");
+}).catch(e=>loginStatus("Falha ao voltar do Google: "+e.code+" — "+e.message));
+
+onAuthStateChanged(auth,user=>{
+ if(user&&user.email?.toLowerCase()===ADMIN_EMAIL.toLowerCase()){
+  $("login").hidden=true;$("app").hidden=false;$("signedEmail").textContent="Conectado: "+user.email;loginStatus("");startProducts();
+ }else{
+  stopProducts();$("app").hidden=true;$("login").hidden=false;
+  if(user){loginStatus("Conta conectada: "+(user.email||"sem e-mail")+". Esta conta não está autorizada.");signOut(auth).catch(()=>{})}
+ }
+});
+
 $("steamSearch").addEventListener("click",async()=>{
  const query=$("name").value.trim();if(!query){status("Digite o nome do jogo primeiro.");return}
  const button=$("steamSearch");button.disabled=true;status("Buscando na Steam...");
